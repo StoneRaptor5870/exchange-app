@@ -77,7 +77,9 @@ function fillOrder(
   }
 
   if (side === "buy") {
-    // asks should be sorted before you try to fill them
+    // Sorting asks before trying to fill them
+    orderbook.asks.sort((a, b) => a.price - b.price);
+
     orderbook.asks.forEach((o) => {
       if (o.price <= price && quantity > 0) {
         const filledQuantity = Math.min(quantity, o.quantity);
@@ -94,8 +96,8 @@ function fillOrder(
         if (o.quantity === 0) {
           orderbook.asks.splice(orderbook.asks.indexOf(o), 1);
         }
-        if (bookWithQuantity.asks[price] === 0) {
-          delete bookWithQuantity.asks[price];
+        if (bookWithQuantity.asks[o.price] === 0) {
+          delete bookWithQuantity.asks[o.price];
         }
       }
     });
@@ -112,12 +114,15 @@ function fillOrder(
         (bookWithQuantity.bids[price] || 0) + (quantity - executedQty);
     }
   } else {
+    // Sorting the bids before trying to fill them
+    orderbook.bids.sort((a, b) => b.price - a.price);
+
     orderbook.bids.forEach((o) => {
       if (o.price >= price && quantity > 0) {
         const filledQuantity = Math.min(quantity, o.quantity);
         o.quantity -= filledQuantity;
-        bookWithQuantity.bids[price] =
-          (bookWithQuantity.bids[price] || 0) - filledQuantity;
+        bookWithQuantity.bids[o.price] =
+          (bookWithQuantity.bids[o.price] || 0) - filledQuantity;
         fills.push({
           price: o.price,
           qty: filledQuantity,
@@ -128,8 +133,8 @@ function fillOrder(
         if (o.quantity === 0) {
           orderbook.bids.splice(orderbook.bids.indexOf(o), 1);
         }
-        if (bookWithQuantity.bids[price] === 0) {
-          delete bookWithQuantity.bids[price];
+        if (bookWithQuantity.bids[o.price] === 0) {
+          delete bookWithQuantity.bids[o.price];
         }
       }
     });
