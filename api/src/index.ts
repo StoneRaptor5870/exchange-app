@@ -37,7 +37,14 @@ app.post("/api/v1/order", async (req: Request, res: Response) => {
     kind
   );
 
+  console.log("orderbook");
+  console.log(orderbook);
+  console.log("--------------------------------------");
+  console.log("bookswithquantity");
+  console.log(bookWithQuantity);
+
   res.send({
+    status: 'accepted',
     orderId,
     executedQty,
     fills,
