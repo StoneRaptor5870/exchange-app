@@ -1,4 +1,4 @@
-import { config as configDotenv } from "dotenv";
+import { configDotenv } from "dotenv";
 import { Client } from "pg";
 import Redis from "ioredis";
 import { DbMessage } from "./types";
@@ -54,7 +54,23 @@ async function connectToRedis() {
   }
 }
 
+async function refreshViews() {
+  try {
+    await pgClient.query("REFRESH MATERIALIZED VIEW klines_1m");
+    await pgClient.query("REFRESH MATERIALIZED VIEW klines_1h");
+    await pgClient.query("REFRESH MATERIALIZED VIEW klines_1w");
+
+    console.log("Materialized views refreshed successfully");
+  } catch (err) {
+    console.error("Error refreshing materialized views:", err);
+  }
+}
+
 async function main() {
+  setInterval(() => {
+    refreshViews().catch(console.error);
+  }, 1000 * 10);
+
   while (true) {
     try {
       const response = await redisClient.rpop("db_processor");

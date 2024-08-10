@@ -19,6 +19,8 @@ orderRouter.post("/", async (req: Request, res: Response) => {
     },
   });
 
+  console.log(response);
+
   if (response.type === "ORDER_PLACED") {
     res.json({
       message: "Order Successfully Placed",

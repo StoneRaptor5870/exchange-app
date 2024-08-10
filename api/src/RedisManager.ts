@@ -1,17 +1,16 @@
-import { RedisClientType, createClient } from "redis";
+// import { RedisClientType, createClient } from "redis";
+import Redis from "ioredis";
 import { MessageFromOrderbook } from "./types/index";
 import { MessageToEngine } from "./types/to";
 
 export class RedisManager {
-  private client: RedisClientType;
-  private publisher: RedisClientType;
+  private client: Redis;
+  private publisher: Redis;
   private static instance: RedisManager;
 
   private constructor() {
-    this.client = createClient();
-    this.client.connect();
-    this.publisher = createClient();
-    this.publisher.connect();
+    this.client = new Redis(process.env.REDIS as string);
+    this.publisher = new Redis(process.env.REDIS as string);
   }
 
   public static getInstance() {
@@ -26,9 +25,10 @@ export class RedisManager {
       const id = this.getRandomClientId();
       this.client.subscribe(id, (message) => {
         this.client.unsubscribe(id);
+        //@ts-ignore
         resolve(JSON.parse(message));
       });
-      this.publisher.lPush(
+      this.publisher.lpush(
         "messages",
         JSON.stringify({ clientId: id, message })
       );

@@ -1,15 +1,21 @@
 import { Client } from "pg";
 import { Router } from "express";
-import { RedisManager } from "../RedisManager";
+import { pgClient } from "..";
 
-const pgClient = new Client({
-  user: "your_user",
-  host: "localhost",
-  database: "my_database",
-  password: "your_password",
-  port: 5432,
-});
-pgClient.connect();
+// const pgClient = new Client({
+//   connectionString: process.env.POSTGRES,
+// });
+
+// async function connectToPostgres() {
+//   try {
+//     await pgClient.connect();
+//     console.log("Successfully connected to PostgreSQL");
+//   } catch (err) {
+//     console.error("Failed to connect to PostgreSQL:", err);
+//   }
+// }
+
+// connectToPostgres();
 
 export const klineRouter = Router();
 
@@ -22,7 +28,7 @@ klineRouter.get("/", async (req, res) => {
       query = `SELECT * FROM klines_1m WHERE bucket >= $1 AND bucket <= $2`;
       break;
     case "1h":
-      query = `SELECT * FROM klines_1m WHERE  bucket >= $1 AND bucket <= $2`;
+      query = `SELECT * FROM klines_1m WHERE bucket >= $1 AND bucket <= $2`;
       break;
     case "1w":
       query = `SELECT * FROM klines_1w WHERE bucket >= $1 AND bucket <= $2`;
@@ -48,7 +54,7 @@ klineRouter.get("/", async (req, res) => {
       }))
     );
   } catch (err) {
-    console.log(err);
-    res.status(500).send(err);
+    console.error("Error executing query:", err);
+    res.status(500).send("Internal server error");
   }
 });
