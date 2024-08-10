@@ -1,7 +1,7 @@
 import { configDotenv } from "dotenv";
 import { DEPTH_UPDATE, TICKER_UPDATE } from "./trade/events";
-// import { RedisClientType, createClient } from "redis";
-import Redis from "ioredis";
+import { RedisClientType, createClient } from "redis";
+// import Redis from "ioredis";
 import { ORDER_UPDATE, TRADE_ADDED } from "./types";
 import { WsMessage } from "./types/toWs";
 import { MessageToApi } from "./types/toApi";
@@ -34,11 +34,19 @@ type DbMessage =
     };
 
 export class RedisManager {
-  private client: Redis;
+  private client: RedisClientType;
   private static instance: RedisManager;
 
   constructor() {
-    this.client = new Redis(process.env.REDIS as string);
+    this.client = createClient({url: process.env.REDIS as string});
+    this.client
+      .connect()
+      .then(() => {
+        console.log("Connected to Redis as client");
+      })
+      .catch((err) => {
+        console.error("Failed to connect to Redis as client:", err);
+      });
   }
 
   public static getInstance() {
@@ -49,7 +57,7 @@ export class RedisManager {
   }
 
   public pushMessage(message: DbMessage) {
-    this.client.lpush("db_processor", JSON.stringify(message));
+    this.client.lPush("db_processor", JSON.stringify(message));
   }
 
   public publishMessage(channel: string, message: WsMessage) {

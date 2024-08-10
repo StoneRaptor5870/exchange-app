@@ -1,6 +1,7 @@
 import { configDotenv } from "dotenv";
 import { Client } from "pg";
-import Redis from "ioredis";
+// import Redis from "ioredis";
+import { RedisClientType, createClient } from "redis";
 import { DbMessage } from "./types";
 
 configDotenv();
@@ -18,11 +19,11 @@ async function connectToPostgres() {
   }
 }
 
-let redisClient: Redis;
+let redisClient: RedisClientType;
 
 async function connectToRedis() {
   try {
-    redisClient = new Redis(process.env.REDIS as string);
+    redisClient = createClient({url: process.env.REDIS as string});
 
     redisClient.on("connect", () => {
       console.log("Connected to Redis Cloud");
@@ -43,6 +44,8 @@ async function connectToRedis() {
     redisClient.on("ready", () => {
       console.log("Redis connection ready");
     });
+
+    await redisClient.connect();
 
     await new Promise((resolve, reject) => {
       redisClient.once("ready", resolve);
@@ -69,11 +72,11 @@ async function refreshViews() {
 async function main() {
   setInterval(() => {
     refreshViews().catch(console.error);
-  }, 1000 * 10);
+  }, 1000 * 1000);
 
   while (true) {
     try {
-      const response = await redisClient.rpop("db_processor");
+      const response = await redisClient.rPop("db_processor");
       if (!response) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } else {
