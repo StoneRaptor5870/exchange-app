@@ -9,7 +9,7 @@ export class RedisManager {
   private static instance: RedisManager;
 
   private constructor() {
-    this.client = createClient({ url: process.env.REDIS as string });
+    this.client = createClient({url: process.env.REDIS as string});
     this.client
       .connect()
       .then(() => {
@@ -19,7 +19,7 @@ export class RedisManager {
         console.error("Failed to connect to Redis as client:", err);
       });
 
-    this.publisher = createClient({ url: process.env.REDIS as string });
+    this.publisher = createClient({url: process.env.REDIS as string});
     this.publisher
       .connect()
       .then(() => {
@@ -38,41 +38,70 @@ export class RedisManager {
   }
 
   public sendAndAwait(message: MessageToEngine) {
-    return new Promise<MessageFromOrderbook>((resolve, reject) => {
+    return new Promise<MessageFromOrderbook>((resolve) => {
       const id = this.getRandomClientId();
-      console.log("Generated clientId:", id);
-
-      // Subscribe to the specific channel for responses
       this.client.subscribe(id, (message) => {
-        console.log(
-          "Subscribed and received message on channel:",
-          id,
-          "with message:",
-          message
-        );
-        this.client.unsubscribe(id); // Unsubscribe after receiving the message
-        try {
-          const parsedMessage = JSON.parse(message);
-          console.log("Parsed message:", parsedMessage);
-          resolve(parsedMessage);
-        } catch (error) {
-          console.error("Error parsing message:", error);
-          reject(error);
-        }
+        this.client.unsubscribe(id);
+        console.log("-----------message", message);
+        resolve(JSON.parse(message));
       });
-
-      // Push the message to the queue
-      console.log("Pushing message to queue with clientId:", id);
       this.publisher.lPush(
         "messages",
         JSON.stringify({ clientId: id, message })
       );
-
-      // Publish the message to a pub/sub channel
-      console.log("Publishing message to pub/sub channel with clientId:", id);
-      this.publisher.publish(id, JSON.stringify(message));
     });
   }
+
+  // public sendAndAwait(message: MessageToEngine) {
+  //   return new Promise<MessageFromOrderbook>((resolve, reject) => {
+  //     const id = this.getRandomClientId();
+  //     console.log("Generated clientId:", id);
+  //     console.log("---------------------message---------------",message)
+
+  //     // // Construct the message with the type key included
+  //     // const messageToSend = {
+  //     //   type: message.type, // Ensure the type is included
+  //     //   payload: message.data,
+  //     // };
+
+  //     // Ensure subscription is set up correctly before publishing
+  //     this.client
+  //       .subscribe(id, (message) => {
+  //         console.log(
+  //           "Subscribed and received message on channel:",
+  //           id,
+  //           "with message:",
+  //           message
+  //         );
+  //         this.client.unsubscribe(id); // Unsubscribe after receiving the message
+  //         try {
+  //           const parsedMessage = JSON.parse(message);
+  //           console.log("Parsed message:", parsedMessage);
+  //           resolve(parsedMessage);
+  //         } catch (error) {
+  //           console.error("Error parsing message:", error);
+  //           reject(error);
+  //         }
+  //       })
+  //       .then(() => {
+  //         // Push the message to the queue after subscription is confirmed
+  //         console.log("Pushing message to queue with clientId:", id);
+  //         return this.publisher.lPush(
+  //           "messages",
+  //           JSON.stringify({ clientId: id, message })
+  //         );
+  //       })
+  //       .then(() => {
+  //         // Publish the message to a pub/sub channel after queue push
+  //         console.log("Publishing message to pub/sub channel with clientId:", id);
+  //         return this.publisher.publish(id, JSON.stringify(message));
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error in Redis operations:", error);
+  //         reject(error);
+  //       });
+  //   });
+  // }
 
   public getRandomClientId() {
     return (

@@ -1,12 +1,13 @@
 import { Router, Request, Response } from "express";
 import { RedisManager } from "../RedisManager";
-import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_OPEN_ORDERS } from "../types";
+import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_OPEN_ORDERS } from "../types/index";
 
 export const orderRouter = Router();
 
 orderRouter.post("/", async (req: Request, res: Response) => {
   const { market, price, quantity, side, userId } = req.body;
   console.log({ market, price, quantity, side, userId });
+  console.log("create order------------------------", CREATE_ORDER);
 
   
     const response = await RedisManager.getInstance().sendAndAwait({
@@ -28,6 +29,7 @@ orderRouter.post("/", async (req: Request, res: Response) => {
     if (response.type === "ORDER_PLACED") {
       res.json({
         message: "Order Successfully Placed",
+        type: response.type,
         orderId: response.payload.orderId,
         executedQty: response.payload.executedQty,
         fills: response.payload.fills,
@@ -35,12 +37,13 @@ orderRouter.post("/", async (req: Request, res: Response) => {
     } else if (response.type === "ORDER_CANCELLED") {
       res.status(400).json({
         message: "Order was cancelled",
+        type: response.type,
         orderId: response.payload.orderId,
         executedQty: response.payload.executedQty,
         remainingQty: response.payload.remainingQty,
       });
     } else if (response.type === "OPEN_ORDERS") {
-      res.json(response.payload);
+      res.json({payload: response.payload, type: response.type,});
     } else {
       res.status(400).json({ message: "Unknown response type" });
     }

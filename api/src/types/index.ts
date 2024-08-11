@@ -6,7 +6,7 @@ export const GET_OPEN_ORDERS = "GET_OPEN_ORDERS";
 export const GET_DEPTH = "GET_DEPTH";
 
 export type MessageFromOrderbook =
-  | {
+   {
       type: "DEPTH";
       payload: {
         market: string;
