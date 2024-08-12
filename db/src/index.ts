@@ -23,7 +23,7 @@ let redisClient: RedisClientType;
 
 async function connectToRedis() {
   try {
-    redisClient = createClient({url: process.env.REDIS as string});
+    redisClient = createClient();
 
     redisClient.on("connect", () => {
       console.log("Connected to Redis Cloud");
