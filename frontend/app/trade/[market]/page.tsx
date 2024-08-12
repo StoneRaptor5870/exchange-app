@@ -1,5 +1,6 @@
 "use client";
 
+import { Depth } from "@/app/components/depth/Depth";
 import { MarketBar } from "@/app/components/MarketBar";
 import { SwapUI } from "@/app/components/SwapUI";
 import { TradeView } from "@/app/components/TradeView";
@@ -17,7 +18,7 @@ export default function Page() {
             <TradeView market={market as string} />
           </div>
           <div className="flex flex-col w-[250px] overflow-hidden">
-            Depth
+            <Depth market={market as string} />
           </div>
         </div>
       </div>
