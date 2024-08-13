@@ -14,7 +14,7 @@ export default function Page() {
     <div className="flex flex-col lg:flex-row flex-1">
       <div className="flex flex-col flex-1">
         <MarketBar market={market as string} />
-        <div className="flex flex-col lg:flex-row h-auto lg:h-[920px] border-y border-slate-800">
+        <div className="flex flex-col lg:flex-row h-auto lg:h-[920px] border-y border-slate-800 gap-4">
           <div className="flex flex-col flex-1">
             <TradeView market={market as string} />
           </div>

@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { SignalingManager } from "../utils/SignalingManager";
+import { RecentTradesTable } from "./RecentTradeTable";
+import { getTicker } from "../utils/httpClient";
 
 export default function RecentTrades({ market }: { market: string }) {
     const [recentTrades, setRecentTrades] = useState<any[]>([]);
+    const [absolutePrice, setAbsolutePrice] = useState<string>();
 
     useEffect(() => {
+        getTicker(market).then((t) => setAbsolutePrice(t.lastPrice));
+
         const handleTrade = (data: any) => {
             setRecentTrades(prevTrades => [
                 {
@@ -14,7 +19,7 @@ export default function RecentTrades({ market }: { market: string }) {
                     quantity: data?.quantity ?? '',
                     time: data?.time ?? '',
                 },
-                ...prevTrades.slice(0, 29)
+                ...prevTrades.slice(0, 39)
             ]);
         };
 
@@ -29,24 +34,16 @@ export default function RecentTrades({ market }: { market: string }) {
 
     return (
         <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {recentTrades.map((trade, index) => (
-                        <tr key={index}>
-                            <td>{trade.price}</td>
-                            <td>{trade.quantity}</td>
-                            <td>{new Date(trade.time).toLocaleTimeString()}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <TableHeader />
+            {recentTrades && <RecentTradesTable recentTrades={recentTrades} absolutePrice={absolutePrice}/>}
         </div>
     );
+}
+
+function TableHeader() {
+    return <div className="flex justify-between text-xs">
+    <div className="text-white">Price</div>
+    <div className="text-slate-500">Quantity</div>
+    <div className="text-slate-500">Time</div>
+</div>
 }
