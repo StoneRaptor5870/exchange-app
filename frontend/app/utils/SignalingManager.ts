@@ -66,6 +66,12 @@ export class SignalingManager {
                         const updatedAsks = message.data.a;
                         callback({ bids: updatedBids, asks: updatedAsks });
                     }
+                    if (type === "trade") {
+                        const tradeAtPrice = message.data.p;
+                        const tradeAtQuantity = message.data.q;
+                        const tradeAtTime = message.data.t;
+                        callback({price: tradeAtPrice, quantity: tradeAtQuantity, time: tradeAtTime });
+                    }
                 });
             }
         }

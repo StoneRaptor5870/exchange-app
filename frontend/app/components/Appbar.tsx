@@ -35,12 +35,12 @@ export const Appbar = () => {
             Trade
           </div>
         </div>
-        <div className="flex">
+        {/* <div className="flex">
           <div className="p-2 mr-2">
             <SuccessButton>Deposit</SuccessButton>
             <PrimaryButton>Withdraw</PrimaryButton>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
