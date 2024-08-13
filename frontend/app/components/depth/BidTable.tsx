@@ -1,12 +1,30 @@
-
 export const BidTable = ({ bids }: {bids: [string, string][]}) => {
-    let currentTotal = 0; 
-    const relevantBids = bids.slice(0, 15);
-    const bidsWithTotal: [string, string, number][] = relevantBids.map(([price, quantity]) => [price, quantity, currentTotal += Number(quantity)]);
-    const maxTotal = relevantBids.reduce((acc, [_, quantity]) => acc + Number(quantity), 0);
+    // Calculate cumulative totals for bids (from highest to lowest)
+    const bidsWithTotal = (bids || []).reduce((acc, [price, quantity]) => {
+        const cumulativeSize =
+          acc.length === 0
+            ? Number(quantity)
+            : acc[acc.length - 1].cumulativeSize + Number(quantity);
+        acc.push({ price, quantity, cumulativeSize });
+        return acc;
+      }, [] as { price: string; quantity: string; cumulativeSize: number }[]);
+
+    // Take the top 15 bids
+    const relevantBids = bidsWithTotal.slice(0, 15);
+
+    // Calculate the max cumulative size for the top 15 bids
+    const maxTotal = relevantBids.length > 0 ? relevantBids[relevantBids.length - 1].cumulativeSize : 0;
 
     return <div>
-        {bidsWithTotal?.map(([price, quantity, total]) => <Bid maxTotal={maxTotal} total={total} key={price} price={price} quantity={quantity} />)}
+        {relevantBids?.map(({ price, quantity, cumulativeSize }) => (
+            <Bid 
+                maxTotal={maxTotal} 
+                total={cumulativeSize} 
+                key={price} 
+                price={price} 
+                quantity={quantity} 
+            />
+        ))}
     </div>
 }
 
