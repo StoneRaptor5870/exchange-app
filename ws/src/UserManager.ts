@@ -41,3 +41,13 @@ export class UserManager {
     );
   }
 }
+
+// When a trade gets filled, publish the update to the user’s trade channel:
+
+// const tradeUpdate: TradeUpdateMessage = {
+//   type: "trade",
+//   data: {
+//       // Populate with trade data
+//   }
+// };
+// redisClient.publish(`trades:${userId}`, JSON.stringify(tradeUpdate));

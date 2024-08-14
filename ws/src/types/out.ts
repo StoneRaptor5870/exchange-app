@@ -22,4 +22,11 @@ export type DepthUpdateMessage = {
   };
 };
 
+// export type TradeUpdateMessage = {
+//   type: "trade",
+//   data: {
+//       // Trade details like price, amount, etc.
+//   }
+// }
+
 export type OutgoingMessage = TickerUpdateMessage | DepthUpdateMessage;

@@ -37,6 +37,11 @@ export class SubscriptionManager {
     }
   }
 
+  public subscribeToTrades(userId: string) {
+    const tradeSubscription = `trades:${userId}`;
+    this.subscribe(userId, tradeSubscription);
+}
+
   private redisCallbackHandler = (message: string, channel: string) => {
     const parsedMessage = JSON.parse(message);
     this.reverseSubscriptions
